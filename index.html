@@ -102,8 +102,9 @@
   footer a{color:inherit;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .3s}
   footer a:hover{border-color:var(--ink-soft)}
   .ltr{direction:ltr;unicode-bidi:isolate}
-  [data-en]{display:none}
-  html[lang="en"] [data-ar]{display:none}
+  [data-en]{display:none!important}
+  html[lang="en"] [data-ar]{display:none!important}
+  html[lang="en"] [data-en]{display:revert!important}
   html[lang="en"] [data-en]{display:revert}
   @media (max-width:520px){footer{justify-content:center;text-align:center}.tag{letter-spacing:.24em;font-size:10px}}
   @media (prefers-reduced-motion:reduce){
@@ -118,6 +119,42 @@
   .lbl{display:block;margin-top:8px;font-size:12px;letter-spacing:.08em;color:var(--ink-soft)}
   html[lang="en"] .lbl{text-transform:uppercase;font-size:10px;letter-spacing:.2em}
   .count + .cta{margin-top:28px}
+  /* ---------- Notify form (modal) ---------- */
+  .modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;
+    background:rgba(13,18,38,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    opacity:0;visibility:hidden;transition:opacity .35s, visibility .35s}
+  .modal.open{opacity:1;visibility:visible}
+  .sheet{position:relative;width:100%;max-width:420px;max-height:calc(100svh - 32px);overflow:auto;
+    background:var(--offwhite);border-radius:22px;padding:30px 26px 26px;
+    box-shadow:0 30px 80px -20px rgba(13,18,38,.45);
+    transform:translateY(16px) scale(.98);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+  .modal.open .sheet{transform:none}
+  .sheet .close{position:absolute;top:14px;inset-inline-end:14px;width:36px;height:36px;border-radius:50%;
+    border:1px solid var(--line);background:transparent;color:var(--navy);font-size:20px;line-height:1;cursor:pointer}
+  .sheet .close:hover{background:rgba(13,18,38,.05)}
+  .sheet .mini{width:44px;margin:0 auto 14px;color:var(--wine)}
+  .sheet .mini svg{width:100%;height:auto;display:block}
+  .sheet h3{font-family:"Noto Naskh Arabic","Source Sans 3",serif;font-weight:500;font-size:22px;text-align:center;color:var(--navy)}
+  html[lang="en"] .sheet h3{font-family:"Source Sans 3",sans-serif;font-weight:400;letter-spacing:.02em}
+  .sheet p.lead{text-align:center;font-size:14px;line-height:1.7;color:var(--ink-soft);margin:6px 0 20px}
+  .field{display:block;margin-bottom:14px;text-align:start}
+  .field > span{display:block;font-size:13px;color:var(--navy);margin-bottom:6px}
+  .field small{color:var(--ink-soft)}
+  .field input{width:100%;font:inherit;font-size:16px;color:var(--navy);background:#fff;
+    border:1px solid rgba(13,18,38,.16);border-radius:12px;padding:12px 14px;outline:none;transition:border-color .2s, box-shadow .2s}
+  .field input:focus{border-color:var(--wine);box-shadow:0 0 0 3px rgba(121,17,38,.12)}
+  .field input[type=tel],.field input[type=email]{direction:ltr;text-align:start}
+  html[dir=rtl] .field input[type=tel],html[dir=rtl] .field input[type=email]{text-align:right}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .sheet .btn{width:100%;justify-content:center;border:0;cursor:pointer;font:inherit;font-size:15px;margin-top:6px}
+  .sheet .btn[disabled]{opacity:.6;cursor:wait}
+  .err{min-height:20px;font-size:13px;color:var(--wine);text-align:center;margin-top:10px}
+  .note{font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:6px;line-height:1.6}
+  .done{display:none;text-align:center;padding:10px 0 4px}
+  .done .tick{width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:var(--navy);color:var(--offwhite);
+    display:flex;align-items:center;justify-content:center}
+  .sheet.sent form{display:none}
+  .sheet.sent .done{display:block}
 </style>
 </head>
 <body>
@@ -152,7 +189,7 @@
     </div>
 
     <div class="cta fade d3">
-      <a class="btn primary" href="mailto:hello@ovvoshop.com?subject=OVVO%20-%20Notify%20me%20at%20launch">
+      <a class="btn primary" id="notifyBtn" href="mailto:hello@ovvoshop.com?subject=OVVO%20-%20Notify%20me%20at%20launch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
         <span data-ar>أبلغوني عند الافتتاح</span><span data-en>Notify me at launch</span>
       </a>
@@ -164,6 +201,32 @@
     <a class="ltr" href="mailto:hello@ovvoshop.com">hello@ovvoshop.com</a>
     <span data-ar>عمّان، الأردن</span><span data-en>Amman, Jordan</span>
   </footer>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" aria-hidden="true">
+  <div class="sheet" id="sheet">
+    <button class="close" type="button" id="mClose" aria-label="Close">×</button>
+    <div class="mini" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="396 549 288 252" aria-hidden="true"> <defs> <clipPath id="ic2-0"> <path clip-rule="nonzero" d="M 473 674 L 674 674 L 674 775 L 473 775 Z M 473 674 "/> </clipPath> <clipPath id="ic2-1"> <path clip-rule="nonzero" d="M 673.472656 691.714844 C 673.476562 691.320312 673.484375 690.921875 673.484375 690.527344 C 673.484375 684.910156 673.054688 679.4375 672.191406 674.113281 C 672.992188 679.871094 673.429688 685.742188 673.472656 691.714844 M 473.460938 690.527344 C 473.460938 704.441406 476.101562 717.480469 481.378906 729.628906 C 486.652344 741.78125 493.789062 752.355469 502.769531 761.359375 C 507.710938 766.308594 513.132812 770.703125 519.035156 774.523438 C 521.855469 773.507812 524.605469 772.121094 527.304688 770.363281 C 530.394531 768.347656 533.328125 765.972656 536.09375 763.242188 C 533.996094 760.824219 532.011719 758.203125 530.132812 755.375 C 524.578125 747.023438 520.226562 737.28125 517.078125 726.148438 C 513.929688 715.015625 512.355469 703.144531 512.355469 690.527344 Z M 473.460938 690.527344 "/> </clipPath> <clipPath id="ic2-2"> <path clip-rule="nonzero" d="M 406 559 L 674 559 L 674 791 L 406 791 Z M 406 559 "/> </clipPath> <clipPath id="ic2-3"> <path clip-rule="nonzero" d="M 407.820312 674.003906 C 407.808594 674.039062 407.800781 674.074219 407.796875 674.113281 C 407 679.871094 406.558594 685.742188 406.515625 691.714844 L 406.515625 691.828125 C 406.675781 705.261719 409.3125 717.859375 414.425781 729.628906 C 419.703125 741.78125 426.832031 752.355469 435.820312 761.359375 C 444.800781 770.359375 455.359375 777.496094 467.488281 782.785156 C 472.667969 785.046875 478.015625 786.820312 483.519531 788.109375 C 486.351562 788.78125 489.226562 789.316406 492.140625 789.726562 C 496.824219 790.390625 501.617188 790.71875 506.519531 790.71875 C 518.308594 790.71875 529.46875 788.8125 539.996094 784.996094 C 541.867188 784.324219 543.722656 783.585938 545.554688 782.785156 C 548.789062 781.375 551.917969 779.832031 554.925781 778.148438 C 563.207031 773.554688 570.636719 767.957031 577.222656 761.359375 C 586.203125 752.355469 593.332031 741.78125 598.613281 729.628906 C 603.890625 717.480469 606.527344 704.441406 606.527344 690.527344 L 567.636719 690.527344 C 567.636719 703.144531 566.0625 715.015625 562.917969 726.148438 C 559.761719 737.28125 555.414062 747.023438 549.859375 755.375 C 546.84375 759.902344 543.554688 763.914062 539.996094 767.402344 C 536.992188 770.351562 533.800781 772.929688 530.410156 775.132812 C 528.65625 776.277344 526.871094 777.28125 525.058594 778.148438 C 519.199219 780.964844 513.019531 782.367188 506.519531 782.367188 C 497.996094 782.367188 490.03125 779.957031 482.632812 775.132812 C 475.21875 770.3125 468.738281 763.71875 463.179688 755.375 C 457.628906 747.023438 453.277344 737.28125 450.125 726.148438 C 448.035156 718.753906 446.636719 711.03125 445.933594 702.980469 C 445.894531 702.515625 445.859375 702.050781 445.824219 701.589844 C 445.574219 698.378906 445.441406 695.113281 445.410156 691.796875 L 445.410156 691.703125 C 445.40625 691.3125 445.40625 690.921875 445.40625 690.527344 L 445.40625 690.207031 C 445.40625 689.917969 445.410156 689.632812 445.410156 689.347656 C 445.675781 622.097656 487.921875 567.691406 539.996094 567.691406 C 592.070312 567.691406 634.316406 622.097656 634.582031 689.347656 C 634.582031 689.632812 634.585938 689.917969 634.585938 690.207031 L 634.585938 690.527344 C 634.585938 690.921875 634.585938 691.3125 634.582031 691.703125 L 634.582031 691.796875 C 634.550781 695.113281 634.414062 698.378906 634.164062 701.589844 C 634.132812 702.050781 634.097656 702.515625 634.054688 702.980469 C 633.355469 711.03125 631.957031 718.753906 629.867188 726.148438 C 626.714844 737.28125 622.363281 747.023438 616.804688 755.375 C 611.253906 763.71875 604.769531 770.3125 597.359375 775.132812 C 589.957031 779.957031 581.988281 782.367188 573.46875 782.367188 C 569.4375 782.367188 565.527344 781.824219 561.746094 780.746094 C 557.574219 783.320312 553.1875 785.625 548.601562 787.65625 C 556.554688 789.695312 564.84375 790.71875 573.46875 790.71875 C 578.375 790.71875 583.175781 790.390625 587.855469 789.726562 C 590.769531 789.316406 593.644531 788.78125 596.46875 788.113281 C 601.976562 786.820312 607.316406 785.046875 612.503906 782.785156 C 624.632812 777.496094 635.1875 770.359375 644.171875 761.359375 C 653.15625 752.355469 660.28125 741.78125 665.5625 729.628906 C 670.679688 717.859375 673.3125 705.261719 673.472656 691.828125 L 673.472656 691.714844 C 673.429688 685.742188 672.992188 679.871094 672.191406 674.113281 C 672.1875 674.074219 672.179688 674.039062 672.171875 674.003906 C 663.050781 609.164062 607.351562 559.28125 539.996094 559.28125 C 472.644531 559.28125 416.9375 609.164062 407.820312 674.003906 "/> </clipPath> </defs> <g clip-path="url(#ic2-0)"> <g clip-path="url(#ic2-1)"> <path fill-rule="nonzero" fill="currentColor" d="M 473.460938 674.113281 L 473.460938 774.523438 L 673.484375 774.523438 L 673.484375 674.113281 Z M 473.460938 674.113281 "/> </g> </g> <g clip-path="url(#ic2-2)"> <g clip-path="url(#ic2-3)"> <path fill-rule="nonzero" fill="currentColor" d="M 406.515625 559.28125 L 406.515625 790.71875 L 673.472656 790.71875 L 673.472656 559.28125 Z M 406.515625 559.28125 "/> </g> </g> </svg> </div>
+    <form id="notifyForm" novalidate>
+      <h3 id="mTitle"><span data-ar>كوني أول من يعرف</span><span data-en>Be the first to know</span></h3>
+      <p class="lead"><span data-ar>سجّلي معلوماتك ونبلغك أول ما يفتح المتجر.</span><span data-en>Leave your details and we’ll let you know the moment we open.</span></p>
+      <label class="field"><span><span data-ar>الاسم</span><span data-en>Name</span></span>
+        <input name="name" id="fName" autocomplete="name" required maxlength="80"></label>
+      <label class="field"><span><span data-ar>رقم الموبايل (واتساب)</span><span data-en>Mobile (WhatsApp)</span></span>
+        <input name="phone" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="07X XXX XXXX" required maxlength="20"></label>
+      <label class="field"><span><span data-ar>الإيميل</span><span data-en>Email</span> <small><span data-ar>(اختياري)</span><span data-en>(optional)</span></small></span>
+        <input name="email" id="fEmail" type="email" autocomplete="email" placeholder="name@example.com" maxlength="120"></label>
+      <label class="hp" aria-hidden="true">Company<input name="company" tabindex="-1" autocomplete="off"></label>
+      <button class="btn primary" type="submit" id="fSend"><span data-ar>سجّليني</span><span data-en>Notify me</span></button>
+      <div class="err" id="fErr" role="alert"></div>
+      <p class="note"><span data-ar>معلوماتك عندنا بأمان، وما رح نستخدمها إلا لإبلاغك بالافتتاح والعروض.</span><span data-en>We’ll only use your details to tell you about our launch and offers.</span></p>
+    </form>
+    <div class="done" aria-live="polite">
+      <div class="tick"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div>
+      <h3><span data-ar>تم التسجيل، شكراً لك!</span><span data-en>You’re on the list!</span></h3>
+      <p class="lead"><span data-ar>رح نتواصل معك أول ما يفتح متجر OVVO.</span><span data-en>We’ll be in touch as soon as OVVO opens.</span></p>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -191,6 +254,38 @@
       el.m.textContent=pad(Math.floor(s%3600/60)); el.s.textContent=pad(s%60);
     }
     setInterval(tick,1000); tick();
+  })();
+  // ---------- Notify form ----------
+  // Google Apps Script web-app URL (saves to the OVVO sign-ups sheet + emails info@).
+  var FORM_ENDPOINT = '';
+  (function(){
+    var root=document.documentElement, modal=document.getElementById('modal'), sheet=document.getElementById('sheet'),
+        form=document.getElementById('notifyForm'), err=document.getElementById('fErr'), send=document.getElementById('fSend'),
+        btn=document.getElementById('notifyBtn'), last=null;
+    function ar(){return root.lang==='ar'}
+    function open(e){ if(!FORM_ENDPOINT) return; e.preventDefault(); last=document.activeElement;
+      sheet.classList.remove('sent'); err.textContent=''; modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow='hidden'; setTimeout(function(){document.getElementById('fName').focus()},150); }
+    function close(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; if(last) last.focus(); }
+    btn.addEventListener('click',open);
+    document.getElementById('mClose').addEventListener('click',close);
+    modal.addEventListener('click',function(e){ if(e.target===modal) close(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape' && modal.classList.contains('open')) close(); });
+    form.addEventListener('submit',function(e){
+      e.preventDefault(); err.textContent='';
+      var name=form.name.value.trim(), phone=form.phone.value.trim(), email=form.email.value.trim();
+      var digits=phone.replace(/[^0-9]/g,'');
+      if(name.length<2){ err.textContent=ar()?'اكتب/ي الاسم من فضلك':'Please enter your name'; form.name.focus(); return; }
+      if(digits.length<8){ err.textContent=ar()?'رقم الموبايل غير صحيح':'Please enter a valid mobile number'; form.phone.focus(); return; }
+      if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent=ar()?'الإيميل غير صحيح':'Please enter a valid email'; form.email.focus(); return; }
+      var data=new URLSearchParams({name:name, phone:phone, email:email, company:form.company.value,
+        lang:root.lang, page:location.href, ua:navigator.userAgent.slice(0,150)});
+      send.disabled=true;
+      fetch(FORM_ENDPOINT,{method:'POST',mode:'no-cors',body:data})
+        .then(function(){ sheet.classList.add('sent'); form.reset(); })
+        .catch(function(){ err.textContent=ar()?'صار خطأ بالاتصال، جرّب/ي مرة ثانية':'Connection problem, please try again'; })
+        .then(function(){ send.disabled=false; });
+    });
   })();
 </script>
 </body>
