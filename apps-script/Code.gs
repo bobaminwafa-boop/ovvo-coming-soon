@@ -1,11 +1,12 @@
 /**
  * OVVO — Coming Soon sign-ups
- * Paste into: Google Sheet (owned by info@ovvoshop.com) → Extensions → Apps Script.
+ * Apps Script project owned by info@ovvoshop.com, writing to the sheet below.
  * Each sign-up from ovvoshop.com is added as a row in the "Signups" tab
  * and an email is sent to info@ovvoshop.com.
  */
 
 const NOTIFY_TO = 'info@ovvoshop.com';
+const SPREADSHEET_ID = '1-nd0VSgik5JMslcZ8aFEgZjYK2PKsGK__hlb7_lEzBw'; // "OVVO – Coming Soon Sign-ups"
 const SHEET_NAME = 'Signups';
 const HEADERS = ['التاريخ / Date', 'الاسم / Name', 'الموبايل / Mobile', 'الإيميل / Email', 'اللغة / Lang', 'الصفحة / Page', 'الجهاز / Device'];
 
@@ -44,7 +45,7 @@ function doPost(e) {
       '<a href="https://wa.me/' + wa + '">واتساب</a></p>' +
       '<p><b>الإيميل:</b> ' + (email ? esc_(email) : '—') + '</p>' +
       '<p style="color:#666;font-size:13px">مجموع المسجلين لحد الآن: ' + total + '</p>' +
-      '<p><a href="' + SpreadsheetApp.getActiveSpreadsheet().getUrl() + '">افتح جدول التسجيلات</a></p>' +
+      '<p><a href="' + SpreadsheetApp.openById(SPREADSHEET_ID).getUrl() + '">افتح جدول التسجيلات</a></p>' +
       '</div>'
   });
 
@@ -57,7 +58,7 @@ function doGet() {
 
 /* ---------- helpers ---------- */
 function getSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sh = ss.getSheetByName(SHEET_NAME);
   if (!sh) sh = ss.insertSheet(SHEET_NAME);
   if (sh.getLastRow() === 0) {
