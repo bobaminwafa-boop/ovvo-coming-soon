@@ -49,7 +49,7 @@
   /* depth: wine glow over burgundy, navy at the edges */
   .glow{position:fixed;inset:-20%;z-index:1;pointer-events:none;
     background:
-      radial-gradient(42% 46% at 50% 46%, rgba(244,244,244,.96), rgba(244,244,244,.6) 55%, transparent 78%),
+      radial-gradient(36% 40% at 50% 45%, rgba(244,244,244,.85), rgba(244,244,244,.35) 60%, transparent 80%),
       radial-gradient(55% 45% at 88% 92%, rgba(239,229,177,.35), transparent 70%),
       radial-gradient(45% 40% at 8% 6%, rgba(239,229,177,.22), transparent 70%);
     animation:drift 24s ease-in-out infinite alternate;}
@@ -59,7 +59,7 @@
   /* brand pattern watermark (from brand guide) */
   .pattern{position:fixed;inset:-40%;z-index:0;pointer-events:none;
     background:url("pattern.svg") repeat;background-size:238px auto;
-    opacity:.055;transform:rotate(-9deg);animation:slide 90s linear infinite}
+    opacity:.11;transform:rotate(-9deg);animation:slide 90s linear infinite}
   @keyframes slide{to{background-position:238px 230px}}
 
   .wrap{position:relative;z-index:2;min-height:100svh;display:flex;flex-direction:column;
