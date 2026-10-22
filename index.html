@@ -59,7 +59,7 @@
   /* brand pattern watermark (from brand guide) */
   .pattern{position:fixed;inset:-40%;z-index:0;pointer-events:none;
     background:url("pattern.svg") repeat;background-size:238px auto;
-    opacity:.11;transform:rotate(-9deg);animation:slide 90s linear infinite}
+    opacity:.085;transform:rotate(-9deg);animation:slide 90s linear infinite}
   @keyframes slide{to{background-position:238px 230px}}
 
   .wrap{position:relative;z-index:2;min-height:100svh;display:flex;flex-direction:column;
@@ -154,6 +154,13 @@
     display:flex;align-items:center;justify-content:center}
   .sheet.sent form{display:none}
   .sheet.sent .done{display:block}
+  /* shimmer sweep over the logo every ~5s */
+  .logo{position:relative}
+  .logo::after{content:"";position:absolute;inset:0;pointer-events:none;
+    -webkit-mask:url("logo-mask.svg") center/100% 100% no-repeat;mask:url("logo-mask.svg") center/100% 100% no-repeat;
+    background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.85) 50%,transparent 65%) no-repeat;
+    background-size:250% 100%;background-position:150% 0;animation:sweep 5s ease-in-out 2s infinite}
+  @keyframes sweep{0%{background-position:150% 0}35%,100%{background-position:-60% 0}}
 </style>
 </head>
 <body>
